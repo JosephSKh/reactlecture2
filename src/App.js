@@ -25,29 +25,33 @@ function Code({ children, fontSize = 13 }) {
 }
 function hl(line) {
   const rules = [
-    { re: /(#.*$)/, c: C.dim },
     { re: /(\/\/.*$)/, c: C.dim },
-    { re: /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/, c: "#a5d6ff" },
-    { re: /\b(import|export|default|from|return|const|let|var|function|if|else|async|await|true|false|null|undefined)\b/, c: C.red },
-    { re: /\b(describe|it|test|expect|vi|beforeEach|afterEach|render|screen|fireEvent|getByText|getByRole|page)\b/, c: C.yellow },
-    { re: /\b(useState|useEffect|useCallback|useRef|React)\b/, c: C.purple },
+    { re: /(#.*$)/, c: C.dim },
+    { re: /(`(?:[^`\\]|\\.)*`|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/, c: "#a5d6ff" },
+    { re: /\b(import|export|default|from|return|const|let|var|function|class|extends|new|this|typeof|instanceof|if|else|for|while|do|switch|case|break|continue|async|await|true|false|null|undefined|void|delete|in|of|throw|try|catch|finally|static|super|yield)\b/, c: C.red },
+    { re: /\b(describe|it|test|expect|vi|beforeEach|afterEach|beforeAll|afterAll|render|screen|fireEvent|getByText|getByRole|page|userEvent)\b/, c: C.yellow },
+    { re: /\b(useState|useEffect|useCallback|useRef|useMemo|useContext|useReducer|React|Suspense|lazy)\b/, c: C.purple },
     { re: /(<\/?[A-Z][A-Za-z0-9]*)/, c: "#79c0ff" },
-    { re: /(<\/?[a-z][a-z0-9]*)/, c: C.green },
-    { re: /\b(\d+)\b/, c: "#f8c8a0" },
+    { re: /(<\/?[a-z][a-z0-9-]*)/, c: C.green },
+    { re: /\b([A-Z][A-Za-z0-9]*)/, c: "#79c0ff" },
+    { re: /\b(\d+(?:\.\d+)?)\b/, c: "#f8c8a0" },
   ];
+  // Find the earliest match across all rules (not just the first rule that matches anywhere)
   let rem = line, res = [], k = 0;
   while (rem.length > 0) {
-    let matched = false;
+    let bestStart = rem.length, bestText = null, bestColor = null;
     for (const { re, c } of rules) {
-      const m = rem.match(new RegExp("^((?:(?!" + re.source + ")[\\s\\S])*?)" + re.source));
-      if (m && m[2] !== undefined) {
-        if (m[1]) res.push(<span key={k++}>{m[1]}</span>);
-        res.push(<span key={k++} style={{ color: c }}>{m[2]}</span>);
-        rem = rem.slice(m[1].length + m[2].length);
-        matched = true; break;
+      const m = rem.match(re);
+      if (m !== null && m.index < bestStart) {
+        bestStart = m.index;
+        bestText = m[0];
+        bestColor = c;
       }
     }
-    if (!matched) { res.push(<span key={k++}>{rem}</span>); rem = ""; }
+    if (bestText === null) { res.push(<span key={k++}>{rem}</span>); break; }
+    if (bestStart > 0) res.push(<span key={k++}>{rem.slice(0, bestStart)}</span>);
+    res.push(<span key={k++} style={{ color: bestColor }}>{bestText}</span>);
+    rem = rem.slice(bestStart + bestText.length);
   }
   return res;
 }
