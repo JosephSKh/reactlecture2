@@ -641,6 +641,81 @@ function SeniorChecklist() {
   );
 }
 
+/* ── CSS Variables demo ─────────────────────────────── */
+function CSSVariablesDemo() {
+  const palettes = {
+    ocean:    { name: "Ocean 🌊",    primary: "#58a6ff", bg: "#0d1117", surface: "#161b22", text: "#e6edf3", accent: "#3fb950" },
+    sunset:   { name: "Sunset 🌅",   primary: "#f78166", bg: "#1a0e0e", surface: "#2b1515", text: "#f0ddd9", accent: "#e3b341" },
+    forest:   { name: "Forest 🌿",   primary: "#3fb950", bg: "#0d1a0f", surface: "#111f13", text: "#d2f0d2", accent: "#61dafb" },
+    lavender: { name: "Lavender 💜", primary: "#d2a8ff", bg: "#110d1a", surface: "#1b1228", text: "#ead9f5", accent: "#ff7b72" },
+  };
+
+  const [theme, setTheme] = useState("ocean");
+  const p = palettes[theme];
+
+  // React allows CSS custom property names as inline style keys — children
+  // that reference var(--c-*) inherit them, giving a real live demo.
+  const cssVars = {
+    "--c-primary": p.primary,
+    "--c-bg":      p.bg,
+    "--c-surface": p.surface,
+    "--c-text":    p.text,
+    "--c-accent":  p.accent,
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {Object.entries(palettes).map(([key, val]) => (
+          <button key={key} onClick={() => setTheme(key)}
+            style={{ flex: 1, padding: "8px 4px", borderRadius: 8, cursor: "pointer", fontFamily: "monospace", fontSize: 11, fontWeight: 700, transition: "all 0.25s", background: theme === key ? val.primary + "22" : C.surface, border: `2px solid ${theme === key ? val.primary : C.border2}`, color: theme === key ? val.primary : C.muted }}>
+            {val.name}
+          </button>
+        ))}
+      </div>
+
+      <Row gap={14}>
+        <Col style={{ flex: 1.2 }}>
+          <div style={{ ...cssVars, background: "var(--c-bg)", border: `2px solid var(--c-primary)`, borderRadius: 12, padding: 20, transition: "all 0.4s ease", fontFamily: "monospace" }}>
+            <div style={{ fontSize: 13, color: "var(--c-primary)", fontWeight: 800, marginBottom: 10 }}>Live Preview Card</div>
+            <div style={{ fontSize: 12, color: "var(--c-text)", marginBottom: 14, lineHeight: 1.7 }}>
+              These colors come from CSS variables — click any theme and <span style={{ color: "var(--c-accent)", fontWeight: 700 }}>everything updates instantly.</span>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+              <div style={{ flex: 1, background: "var(--c-surface)", borderRadius: 6, padding: "8px 10px", fontSize: 11, color: "var(--c-accent)", border: `1px solid var(--c-primary)` }}>
+                --c-surface / --c-accent
+              </div>
+              <div style={{ flex: 1, background: "var(--c-primary)", borderRadius: 6, padding: "8px 10px", fontSize: 11, color: "var(--c-bg)", fontWeight: 700 }}>
+                --c-primary
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: "var(--c-text)", opacity: 0.6 }}>No JS needed to update — just swap the variable values on <code>:root</code>.</div>
+          </div>
+        </Col>
+        <Col>
+          <Code fontSize={12}>{`:root {
+  --c-primary: ${p.primary};
+  --c-bg:      ${p.bg};
+  --c-surface: ${p.surface};
+  --c-text:    ${p.text};
+  --c-accent:  ${p.accent};
+}
+/* Use anywhere — no import needed */
+.card {
+  background: var(--c-bg);
+  color: var(--c-text);
+  border: 2px solid var(--c-primary);
+}
+.badge {
+  /* fallback if var is missing */
+  color: var(--c-accent, #61dafb);
+}`}</Code>
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════════
    SLIDES
 ══════════════════════════════════════════════════════ */
@@ -658,7 +733,7 @@ const SLIDES = [
           From <Hl color={C.red}>"it works on my machine"</Hl> → <Hl color={C.green}>production-grade app</Hl>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-          {["npm vs npx", "CSR vs SSR", "Vite vs Next.js", "Testing Pyramid", "Build Pipeline", "CI/CD"].map(t => (
+          {["npm vs npx", "CSR vs SSR", "Vite vs Next.js", "CSS Variables", "Testing Pyramid", "Build Pipeline", "CI/CD"].map(t => (
             <Chip key={t} color={C.teal}>{t}</Chip>
           ))}
         </div>
@@ -678,6 +753,7 @@ const SLIDES = [
             ["⚡", "npm vs npx",        "10 min", C.blue],
             ["🌐", "CSR vs SSR",        "15 min", C.purple],
             ["🔧", "Vite vs Next.js",   "15 min", C.teal],
+            ["🎨", "CSS Variables",     "10 min", C.purple],
             ["🧪", "Testing Pyramid",   "20 min", C.yellow],
             ["📦", "Build Pipeline",    "15 min", C.orange],
             ["🚀", "Deploy & Security", "10 min", C.green],
@@ -834,7 +910,40 @@ export const revalidate = 60;`}</Code>
     ),
   },
 
-  // 8 — testing pyramid (interactive)
+  // 8 — CSS variables (interactive)
+  {
+    section: "Styling", title: "CSS Variables",
+    live: true,
+    render: () => (
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <SlideTitle>One value change. <Hl color={C.purple}>Everything updates.</Hl></SlideTitle>
+        <CSSVariablesDemo />
+        <Row gap={14} style={{ marginTop: 16 }}>
+          <Col>
+            <Card color={C.purple} style={{ padding: "12px 14px" }}>
+              <div style={{ fontFamily: "monospace", fontSize: 11, color: C.purple, marginBottom: 6 }}>Dark / light toggle from JS</div>
+              <Code fontSize={12}>{`// one line — no re-render needed
+document.documentElement
+  .style.setProperty(
+    '--c-primary', '#f78166'
+  );`}</Code>
+            </Card>
+          </Col>
+          <Col>
+            <Card color={C.yellow} style={{ padding: "12px 14px" }}>
+              <div style={{ fontFamily: "monospace", fontSize: 11, color: C.yellow, marginBottom: 6 }}>vs Sass / preprocessors</div>
+              <div style={{ fontFamily: "monospace", fontSize: 12, color: C.muted, lineHeight: 1.7 }}>
+                Sass <code style={{ color: C.yellow }}>$vars</code> compile away at build time — they can't change at runtime. CSS custom properties live in the browser and respond to JS instantly.
+              </div>
+            </Card>
+          </Col>
+        </Row>
+        <TeacherNote>Ask: "How would you implement a dark/light mode toggle using only CSS variables?" Answer: keep two sets of values and swap them by toggling a class on &lt;html&gt; — e.g. `html.dark {"{"} --c-bg: #000; {"}"}`.</TeacherNote>
+      </div>
+    ),
+  },
+
+  // 9 — testing pyramid (interactive)
   {
     section: "Testing", title: "The Testing Pyramid",
     live: true,
@@ -1245,8 +1354,8 @@ export default function ReactBeyondBasics() {
 
   const sectionColors = {
     "Welcome": C.teal, "Overview": C.blue, "Entry Point": C.blue,
-    "Rendering": C.purple, "Tooling": C.teal, "Testing": C.yellow,
-    "Build Pipeline": C.orange, "Deployment": C.green,
+    "Rendering": C.purple, "Tooling": C.teal, "Styling": C.purple,
+    "Testing": C.yellow, "Build Pipeline": C.orange, "Deployment": C.green,
     "Live Coding": C.teal, "Summary": C.green, "Next Steps": C.blue,
   };
   const sectionColor = sectionColors[slide.section] || C.blue;
